@@ -4,4 +4,4 @@ A look at Tampa, FL and some of its noteworthy attractions, as curated by Nathan
 
 Must be viewed over http:// protocol, not file.  Tested with python -m SimpleHTTPServer [port]
 
-Tight - but usable - on mobile.
+Tight - but usable - on mobile.  Pulls in detailed data from Google Places API.
