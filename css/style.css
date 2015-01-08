@@ -114,3 +114,20 @@ h1,h2,h3,h4 {
 #map * {
 	z-index: 20;
 }
+
+
+
+/* Smartphones (portrait) */
+@media only screen and (max-width: 480px) {
+  body { font-size: 16px;}
+  header { top: auto; left: auto; bottom: 0px; left: 0px; width: 100%; padding: 10px; background-color: rgba(255,255,255,.80); }
+  h1 { font-size: 16px; }
+  h2 { display: none;  }
+  h3 { display: none; }
+  #results {
+	max-height: 120px;
+	}
+.result-set input {	
+	font-size: 12px;
+}
+}
