@@ -22,6 +22,7 @@
 		<input data-bind="value: search, valueUpdate: 'keyup',  event: { keyup: displayListings }" placeholder="Search Listings" />
 		
 		<h3>Results:</h3>
+		<div class="result-text" data-bind="text: resultCountText"></div>
 		<ul id="results" data-bind="foreach: filteredListings">
 			<li onclick="listingDetails(this);" >
 				<span data-bind="text: name,attr:{ 'data-id': gid}"></span>
@@ -35,7 +36,7 @@
 	<div id="container">
 	
 		<div id="map"></div>	
-	
+		<div id="map-info">Google Maps requires that this page be run via HTTP protocol.  The map will also fail if Google Maps' API is blocked via firewall or otherwise cannot be accessed.  To run (with Python installed), run python -m SimpleHTTPServer at the command line.</div>
 	</div>
   
   </body>

@@ -16,6 +16,7 @@ var KEY = 'AIzaSyDkG8todDRXl--0ThEqN8Ch0VHowbd4Fow';
 //	Shows listing details, retrieves via API/AJAX
 function listingDetails(id,marker) {
 
+	// Switch depending on focus method (click result versus click marker)
 	if (marker == true) {
 		lid = id;
 	} else {
@@ -23,7 +24,7 @@ function listingDetails(id,marker) {
 	}
 	listing = GLOBAL[lid];
 	
-	// centers map on selected item
+	// Centers map on selected item
 	$(MARKERS).each(function() {
 	
 		if (this.gid == lid) {
@@ -32,6 +33,7 @@ function listingDetails(id,marker) {
 	
 	});
 	
+	// Default loading message
 	$('#details').html('Loading result ...');
 	
 	req = { placeId: lid };
@@ -42,7 +44,7 @@ function listingDetails(id,marker) {
 		ratings: 0
 	}
 	
-	// grabs info from google places
+	// Grabs info from google places
 	detail = new google.maps.places.PlacesService(MAP);
 	detail.getDetails(req, function(pl,status) {
 		console.log(pl);
@@ -97,10 +99,16 @@ $(function() {
 
 // My knockout model
 function AppViewModel() {
+	// set default search
 	this.search = "";
 
+	// set default result count (not implemented)
+	this.resultCountText = '';
+	
 	// overall listings and initialized filtered listings
 	this.filteredListings = ko.observableArray();
+	
+	// Our listings dataset - these will be compared against searches to create filteredListings
     this.listings = [
 	
 		{ name: 'Ciccio\'s / Water', type: 'restaurant', latitude: 27.933003, longitude: -82.43498, description:'A good South Tampa restaurant.', gid: 'ChIJ1QC_BmfDwogR36lcy65TiYw' },
@@ -119,41 +127,52 @@ function AppViewModel() {
 		{ name: 'Clearwater Beach', type: 'beach', latitude: 27.9775301, longitude: -82.82708459999999, description:'A lot of tourist\'s favorite beach. :p', gid: 'ChIJ1cDhykjpwogREp_rKAt6oqI' },
 		{ name: 'University of Tampa', type: 'university', latitude: 27.947488, longitude: -82.46717200000001, description:'A smaller institution with a beautiful campus in downtown Tampa', gid: 'ChIJ90AFeYbEwogR2VUs2R8iu0s' },			
 	];
+	
+	// this alias
 	var self = this;
+	
+	// Invokes displayListings function through filter() with a reset
 	this.displayListings = function() {
 
 		self.filter(true);
 		return true;
 	};
 	
+	// Translates listings into global variables for use outside of KO
 	this.globalizeListings = function() {
-		$(self.listings).each(function(i,l) {
-
-			GLOBAL[l.gid] = l;
+		$(self.listings).each(function(iterator,listing) {
+			GLOBAL[listing.gid] = listing;
 		});
 	};
 	
+	// The primary search mechanism - filtered listings are listings that match a regex
 	this.filter = function(reset) {
+		
+		// Convert search to regex so matching can happen
 		srch = new RegExp(self.search,'gi');
 		if (srch == '') {
 			srch = new RegExp("c",'gi');
 		}
+		
+		// Clearout existing filtered items
 		self.filteredListings.removeAll();
 
+		// Remove existing markers for reset
 		for(i=0;i<MARKERS.length;i++) {
 
 			MARKERS[i].setMap(null);
-			/*
-			MARKERS.map = null;
-			MARKERS[i].setMap(null);
-			MARKERS[i] = null;
-			*/
+
 		}
 		
+		// Instantiate markers & infowindows and reset details
+		$('#details').html( '' );	
 		MARKERS = [];
-		var bounds =  new google.maps.LatLngBounds();		
+		INFOWINDOWS = [];
+		var bounds =  new google.maps.LatLngBounds();
+
+		// Examine each item to see if it matches the search criterion
 		$(self.listings).each(function() {
-			
+			// If an item matches, create a new marker and associated infowindow
 			if (this.name.match(srch)) {
 				self.filteredListings.push(this);
 				mlatlng = new google.maps.LatLng(this.latitude, this.longitude);
@@ -163,39 +182,37 @@ function AppViewModel() {
 				});
 				mrk.bpos = mlatlng;
 				mrk.gid = this.gid;
-				MARKERS.push(mrk);	
+				MARKERS.push(mrk);
+				INFOWINDOWS.push(new google.maps.InfoWindow({ content: this.name }));
 				bounds.extend(mlatlng);
 
-				
 			}
 		});
-		
-
-
+	
+		// The listeners for click on map items, which open up the associated infowindow
 		for(i=0;i<MARKERS.length;i++) {
 
 			MARKERS[i].setMap(MAP);
 
 			  google.maps.event.addListener(MARKERS[i], 'click', function(innerKey) {
 				  return function() {
-					  MAP.setCenter(MARKERS[innerKey].getPosition());
+					MAP.setCenter(MARKERS[innerKey].getPosition());
 					listingDetails(MARKERS[innerKey].gid,true);
+					INFOWINDOWS[innerKey].open(MAP, MARKERS[innerKey]);
 				  }
 				}(i));
 		}
 		
-		
+		// If there are matches, invoke the fitBounds() function to get closest view
 		if (self.filteredListings().length > 0 && reset == true) {
 			MAP.fitBounds(bounds);
 		}
 		
 
-		self.emitMarkers();
 	};	
-	
-	this.emitMarkers = function() {
 
-	};
+	
+	// Run a default filter and globalize any search match items.  By default this will match all * items.
 	this.globalizeListings();	
 	this.filter(false);
 
