@@ -73,9 +73,21 @@ function initialize() {
 		center: { lat: 27.9710, lng: -82.4650},
 		zoom: 12
 	};
+	
+
+	
 	MAP = new google.maps.Map(document.getElementById('map'), mapOptions);
 	VM.filter();
 }
+
+/*
+	Now provides feedback if google maps cannot be accessed
+	- Response to instructor feedback
+*/
+if (typeof(google) == 'undefined' ) {
+	alert('Error: Google Maps requires that this page be run via HTTP protocol.  The map will also fail if Google Maps\' API is blocked via firewall or otherwise cannot be accessed.  To run (with Python installed), run python -m SimpleHTTPServer at the command line.');
+}
+
 google.maps.event.addDomListener(window, 'load', initialize);
 
 

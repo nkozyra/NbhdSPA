@@ -115,6 +115,9 @@ h1,h2,h3,h4 {
 	z-index: 20;
 }
 
+#map-info {
+	z-index: 5;
+}
 
 
 /* Smartphones (portrait) */
